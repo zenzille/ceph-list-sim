@@ -263,7 +263,7 @@ struct Cli {
     #[arg(short='e', long, default_value_t=100000)]
     entries: usize,
 
-    #[arg(short='d', long, default_value_t=false)]
+    #[arg(short='l', long, default_value_t=false)]
     delimiter: bool,
 
     #[arg(short='m', long, default_value_t=10)]
