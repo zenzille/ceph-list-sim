@@ -286,12 +286,23 @@ fn main() {
         ""
     };
 
-    println!("listing bucket with max_keys: {}, read_ahead: {}{}",
-        cli.max_keys, cli.read_ahead, delim_str);
-    let res = list(&mut bucket, "", delimiter, cli.max_keys, cli.read_ahead);
-
-    println!("list returned {} entries, truncated is {}", res.0.len(),
-        res.1.to_string());
+    let mut total_fetched = 0;
+    let mut s3_calls = 0;
+    loop {
+        s3_calls += 1;
+        println!("listing bucket with max_keys: {}, read_ahead: {}{}",
+            cli.max_keys - total_fetched, cli.read_ahead, delim_str);
+        let res = list(&mut bucket, "", delimiter,
+            cli.max_keys - total_fetched, cli.read_ahead);
+        println!("list returned {} entries, truncated is {}", res.0.len(),
+            res.1.to_string());
+        total_fetched += res.0.len();
+        if total_fetched >= cli.max_keys || res.1 == false {
+            break;
+        }
+    }
+    println!("");
+    println!("{} requests to S3 were made", s3_calls);
     println!("{} requests to OSDs were made", bucket.calls);
     println!("{} database queries were submitted", bucket.queries);
     println!("{} rows were returned", bucket.rows_read);
